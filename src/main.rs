@@ -30,7 +30,7 @@ fn main() {
     //update AUR packages
     println!("Updating AUR Packages...");
     let aur_result = Command::new("yay") //change to your AUR helper
-        .args(&["-Syu, ", "--noconfirm"])
+        .args(&["-Syu", "--noconfirm"])
         .output();
 
     match aur_result {
