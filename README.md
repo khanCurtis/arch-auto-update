@@ -1,20 +1,21 @@
 # Arch Auto-Update
 
-A lightweight Rust utility that automatically updates your Arch Linux system on startup.
+A lightweight Rust utility that automatically updates your Arch Linux system on startup with a visible terminal window.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 ## Overview
 
-Arch Auto-Update is a simple, efficient tool designed to keep your Arch Linux system up-to-date with minimal user intervention. It runs automatically when your laptop starts up, ensuring your system receives critical security updates and package upgrades without manual action.
+Arch Auto-Update is a simple, efficient tool designed to keep your Arch Linux system up-to-date with minimal user intervention. It runs automatically when your laptop starts up, opening a terminal window that shows the update process in real-time. After updates complete, the terminal automatically closes.
 
 ## Features
 
 - **Automatic Updates**: Runs `pacman -Syu` automatically when your system boots
 - **AUR Support**: Updates AUR packages using your AUR helper (yay by default)
+- **Visual Feedback**: Opens a terminal window to show update progress
+- **Auto-closing**: Terminal closes automatically after updates complete
 - **Systemd Integration**: Easy setup with provided systemd service file
-- **Minimal Resource Usage**: Written in Rust for efficiency and reliability
-- **Zero Dependencies**: No external dependencies required
+- **Terminal Detection**: Automatically finds available terminal emulators
 
 ## Installation
 
@@ -38,6 +39,7 @@ Arch Auto-Update is a simple, efficient tool designed to keep your Arch Linux sy
 
 4. Enable the service:
    ```bash
+   sudo systemctl daemon-reload
    sudo systemctl enable arch-auto-update.service
    ```
 
@@ -56,9 +58,24 @@ let aur_result = Command::new("yay")
 let aur_result = Command::new("paru")
 ```
 
-### Disabling AUR Updates
+### Changing the Auto-close Timeout
 
-If you don't use AUR packages or prefer not to update them automatically, you can comment out or remove the AUR section from the script.
+By default, the terminal window closes 5 seconds after updates complete. To change this duration, modify the `sleep 5` line in the script.
+
+### Terminal Emulator Priority
+
+The script checks for terminal emulators in this order:
+- alacritty
+- konsole
+- gnome-terminal
+- xfce4-terminal
+- mate-terminal
+- terminator
+- kitty
+- urxvt
+- xterm
+
+To change the priority, modify the `terminals` vector in the `find_terminal_emulator()` function.
 
 ## Security Considerations
 
@@ -75,24 +92,37 @@ USERNAME ALL=(ALL) NOPASSWD: /usr/bin/pacman
 
 If using an AUR helper, you may also need to add it to the sudoers file.
 
-## Viewing Update Results
+## Troubleshooting
 
-Since the tool doesn't use a dedicated log file, you can view update results in the systemd journal:
+### Terminal doesn't appear
 
-```bash
-journalctl -u arch-auto-update.service
-```
+If the terminal window doesn't appear at startup:
+1. Check if your display server is running (X11/Wayland)
+2. Verify the service is running: `systemctl status arch-auto-update.service`
+3. Check for errors in the journal: `journalctl -u arch-auto-update.service`
+4. Make sure a supported terminal emulator is installed
+
+### Updates fail
+
+If updates fail:
+1. Try running the commands manually to check for errors:
+   ```bash
+   sudo pacman -Syu
+   yay -Syu
+   ```
+2. Verify internet connectivity
+3. Check for sufficient disk space
 
 ## FAQ
 
 **Q: Is it safe to automatically update Arch Linux?**
 A: While generally safe, automatic updates without supervision carry some risk. Consider implementing snapshot mechanisms before updates or checking the journal after updates for any issues.
 
-**Q: Can I schedule updates instead of running at boot?**
-A: Yes, you can modify the systemd service file to use a timer instead of running at boot.
+**Q: Will this work with Wayland?**
+A: Yes, but you may need to adjust the `DISPLAY` and `XAUTHORITY` environment variables in the service file.
 
-**Q: What if an update breaks my system?**
-A: Consider implementing a snapshot mechanism before updates, such as using Timeshift or Snapper to create system snapshots.
+**Q: Does this work with display managers other than GDM/SDDM?**
+A: Yes, the script should work with any display manager as long as a graphical environment is available.
 
 ## Contributing
 
