@@ -20,7 +20,7 @@ Arch Auto-Update is a simple, efficient tool designed to keep your Arch Linux sy
 
 1. Clone this repository:
    ```bash
-   git clone https://github.com/yourusername/arch-auto-update.git
+   git clone https://github.com/khanCurtis/arch-auto-update.git
    cd arch-auto-update
    ```
 
