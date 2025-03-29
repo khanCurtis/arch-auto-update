@@ -102,6 +102,42 @@ If the terminal window doesn't appear at startup:
 3. Check for errors in the journal: `journalctl -u arch-auto-update.service`
 4. Make sure a supported terminal emulator is installed
 
+### Alternative Desktop Entry Method
+
+If the systemd service approach doesn't work reliably for showing a terminal window, you can use a desktop entry file instead:
+
+1. Disable the systemd service:
+   ```bash
+   sudo systemctl disable arch-auto-update.service
+   ```
+
+2. Create an autostart directory if it doesn't exist:
+   ```bash
+   mkdir -p ~/.config/autostart
+   ```
+
+3. Create a desktop entry file `~/.config/autostart/arch-auto-update.desktop`:
+   ```
+   [Desktop Entry]
+   Type=Application
+   Name=Arch Linux Auto Update
+   Comment=Automatically updates Arch Linux on startup
+   Exec=sh -c "sleep 10 && TERMINAL_NAME -e 'bash -c \"sudo pacman -Syu --noconfirm && yay -Syu --noconfirm --noclipboard --nodiffmenu --noeditmenu; echo Update completed, terminal will close in 5 seconds; sleep 5\"'"
+   Terminal=false
+   X-GNOME-Autostart-enabled=true
+   Hidden=false
+   NoDisplay=false
+   ```
+
+   Replace `TERMINAL_NAME` with your terminal emulator (`gnome-terminal`, `konsole`, `xfce4-terminal`, `alacritty`, etc.)
+
+4. Make the desktop entry executable:
+   ```bash
+   chmod +x ~/.config/autostart/arch-auto-update.desktop
+   ```
+
+This desktop entry approach is often more reliable for launching GUI applications at startup.
+
 ### Updates fail
 
 If updates fail:
